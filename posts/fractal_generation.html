@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Fractal Generation: A Rustacean’s Prespective</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Fractal Generation: A Rustacean’s Prespective</h1>
+<p class="date">October, 1st 2021</p>
+</header>
+<h2 id="the-mandelbrot-case-study">The Mandelbrot Case Study</h2>
+<hr />
+<p>The mandelbrot is arguably the most popular fractal out there. The
+corresponding set is defined as follows</p>
+<p><span
+class="math display"><em>z</em><sub><em>n</em> + 1</sub> = <em>z</em><sub><em>n</em></sub><sup>2</sup> + <em>c</em></span></p>
+<p>In order to generate a fractal from this equation we plot all of the
+points <span class="math inline"><em>c</em></span> in the complex plane
+that have a stable orbit under the iteration of <span
+class="math inline"><em>z</em><sub><em>n</em></sub></span>.</p>
+<p>The following is an implementation of the Level-Set Method (LSM/M) or
+also known as the <a
+href="https://en.wikipedia.org/wiki/Mandelbrot_set#Computer_drawings">escape
+time algorithm</a> in Rust</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// maximum iteration count</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> MAX_ITER<span class="op">:</span> <span class="dt">i32</span> <span class="op">=</span> <span class="dv">1000</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// escape radius squared</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> RADIUS_SQ<span class="op">:</span> <span class="dt">f64</span> <span class="op">=</span> <span class="dv">4.0</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">// scalar implementation of Level Set Method</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">fn</span> lsm(cr<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span> ci<span class="op">:</span> <span class="dt">f64</span>) <span class="op">-&gt;</span> <span class="dt">i32</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// z (real and imaginary parts init)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zr <span class="op">=</span> <span class="dv">0.0</span><span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zi <span class="op">=</span> <span class="dv">0.0</span><span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// z^2 (real and imaginary parts init)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zr2 <span class="op">=</span> <span class="dv">0.0</span><span class="op">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zi2 <span class="op">=</span> <span class="dv">0.0</span><span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// iteration count</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> iteration <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (iteration <span class="op">&lt;</span> MAX_ITER) <span class="op">&amp;&amp;</span> (zr2 <span class="op">+</span> zi2 <span class="op">&lt;</span> RADIUS_SQ) <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// update z</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        zi <span class="op">=</span> <span class="dv">2.0</span> <span class="op">*</span> zr <span class="op">*</span> zi <span class="op">+</span> ci<span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        zr <span class="op">=</span> zr2 <span class="op">-</span> zi2 <span class="op">+</span> cr<span class="op">;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// update z^2</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        zr2 <span class="op">=</span> zr <span class="op">*</span> zr<span class="op">;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        zi2 <span class="op">=</span> zi <span class="op">*</span> zi<span class="op">;</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="co">// and update the iteration count</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        iteration <span class="op">=</span> iteration <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    iteration</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This implementation uses an interesting property of the set, namely a
+point <span class="math inline"><em>c</em></span> belongs to the set if
+and only if <span
+class="math inline">|<em>z</em><sub><em>n</em></sub>| ≤ 2</span> for all
+<span class="math inline"><em>n</em> ≥ 0</span>. We call this bound on
+the <span class="math inline"><em>z</em></span> values the escape
+radius.</p>
+<p>To draw the mandelbrot set we use an image extension called
+<strong>PPM</strong> or the <a
+href="http://netpbm.sourceforge.net/doc/ppm.html">portable pixmap
+format</a>. The good thing about <code>PPM</code> is that it’s a very
+simple ASCII based format with no compression.</p>
+<p>The format looks something like this but not necessarily</p>
+<pre><code>P6           # a &#39;magic number to identify the ppm format&#39;
+800 600      # width and height of the pixel map
+255          # maximum value of each color pixel
+# The part above is the header
+# The part below is the image data: RGB triplets
+255   0   0  # red
+  0 255   0  # green
+  0   0 255  # blue
+255 255   0  # yellow
+255 255 255  # white
+  0   0   0  # black</code></pre>
+<p>Finally, we plot the pixels and save the file with this format.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> render_mandelbrot() <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> img_buffer<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="pp">vec!</span>[<span class="dv">0</span><span class="op">;</span> WIDTH <span class="op">*</span> HEIGHT <span class="op">*</span> <span class="dv">3</span>]<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// main loop through all the pixels</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> y <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>HEIGHT <span class="kw">as</span> <span class="dt">u32</span> <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> x <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>WIDTH <span class="kw">as</span> <span class="dt">u32</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="co">// mapping the pixel coordinates to the Mandelbrot domain</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> (cr<span class="op">,</span> ci) <span class="op">=</span> (</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                (x <span class="kw">as</span> <span class="dt">f64</span> <span class="op">/</span> WIDTH <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> (XMAX <span class="op">-</span> XMIN) <span class="op">+</span> XMIN<span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                (y <span class="kw">as</span> <span class="dt">f64</span> <span class="op">/</span> HEIGHT <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> (YMAX <span class="op">-</span> YMIN) <span class="op">+</span> YMIN<span class="op">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            )<span class="op">;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">// calculate iterations</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> iterations <span class="op">=</span> lsm(cr<span class="op">,</span> ci)<span class="op">;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="co">// set the pixels according to the iterations count</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> pixel_r <span class="op">=</span> (y <span class="kw">as</span> <span class="dt">usize</span> <span class="op">*</span> WIDTH <span class="op">+</span> x <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">*</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> pixel_g <span class="op">=</span> (y <span class="kw">as</span> <span class="dt">usize</span> <span class="op">*</span> WIDTH <span class="op">+</span> x <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">*</span> <span class="dv">3</span> <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> pixel_b <span class="op">=</span> (y <span class="kw">as</span> <span class="dt">usize</span> <span class="op">*</span> WIDTH <span class="op">+</span> x <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">*</span> <span class="dv">3</span> <span class="op">+</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> iterations <span class="op">==</span> MAX_ITER <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                img_buffer[pixel_r] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                img_buffer[pixel_g] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                img_buffer[pixel_b] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                img_buffer[pixel_r] <span class="op">=</span> <span class="dv">255</span><span class="op">;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                img_buffer[pixel_g] <span class="op">=</span> <span class="dv">255</span><span class="op">;</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                img_buffer[pixel_b] <span class="op">=</span> <span class="dv">255</span><span class="op">;</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    img_buffer</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The function iterates through the screen coordinates, maps them to
+the range and domain of the mandelbrot function and then colors with
+black points that belong to the set and with white otherwise.</p>
+<figure>
+<img src="./output/fractal.png"
+alt="1280x720p Mandelbrot fractal (converted to PNG)" />
+<figcaption aria-hidden="true">1280x720p Mandelbrot fractal (converted
+to PNG)</figcaption>
+</figure>
+<h2 id="coloring">Coloring</h2>
+<p>I mean okay cool, but this is kinda boring and there’s nothing to
+kill this boredom better than some coloring. Mandelbrot coloring and
+fractal coloring in general is an exciting topic but it can get quite
+complicated very quickly.</p>
+<p>We’re going to use the iteration count that is returned from the
+<code>lsm()</code> function as an index into an arbitrarily chosen color
+palette.</p>
+<figure>
+<img src="./output/color.png" alt="color palette" />
+<figcaption aria-hidden="true">color palette</figcaption>
+</figure>
+<p>This color palette contains only 5 colors, but our iteration count
+function goes beyond that to 1000, so we truncate this using the module
+operator.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> iterations <span class="op">==</span> MAX_ITER <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    img_buffer[pixel_r] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    img_buffer[pixel_g] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    img_buffer[pixel_b] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    img_buffer[pixel_r] <span class="op">=</span> palette[iterations <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    img_buffer[pixel_g] <span class="op">=</span> palette[iterations <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    img_buffer[pixel_b] <span class="op">=</span> palette[iterations <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">2</span><span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We get something slightly less boring than the black and white
+version but it could be better.</p>
+<figure>
+<img src="./output/fractal2.png" alt="Colored mandelbrot set" />
+<figcaption aria-hidden="true">Colored mandelbrot set</figcaption>
+</figure>
+<p>Much better results can be achieved by using a larger palette of
+colors or by interpolating the colors into a spectrum of size
+<code>MAX_ITER</code>.</p>
+<h2 id="optimization">Optimization</h2>
+<p>Rendering a single mandelbrot frame at a time is not a very CPU
+intensive process. To put things into perspective it takes around
+<strong>~1.2</strong> seconds to render the colored image above on my
+hardware setup, However when we want to generate a lot of frames with a
+limited time constraint this average is relatively large.</p>
+<p>The bottleneck of this program’s performance is the
+<code>lsm()</code> iteration function. We can confirm that from this
+performance flamegraph where the function takes <strong>~86%</strong> of
+the entire computation time, So that should be an interesting spot for
+optimization.</p>
+<figure>
+<img src="./output/flamegraph.svg" style="width:100.0%"
+alt="flamegraph of the rendering program generated from the perf-record(1) output" />
+<figcaption aria-hidden="true">flamegraph of the rendering program
+generated from the <code>perf-record(1)</code> output</figcaption>
+</figure>
+<h3 id="parallelization">Parallelization</h3>
+<p>The process we’ve used so far is multithreading-friendly. However
+there are still some <a
+href="https://en.wikipedia.org/wiki/Race_condition#Data_race">race
+condition</a> gotchas to take care of when implementing this in
+virtually any programming language. To avoid these race shenanigans we
+use a Rust crate for parallelization called <a
+href="https://lib.rs/crates/rayon"><strong>Rayon</strong></a>.</p>
+<p>Rayon uses a policy known as <a
+href="https://en.wikipedia.org/wiki/Work_stealing">Work Stealing</a>
+that was first introduced in the <a
+href="https://en.wikipedia.org/wiki/Cilk">Cilk</a> project.</p>
+<p>In order to use Rayon, we need to turn the main loop in the
+<code>render_mandelbrot()</code> function into a <strong><a
+href="https://docs.rs/rayon/1.5.1/rayon/iter/index.html">parallel
+iterator</a></strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> render_parallel_mandelbrot(palette<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>(<span class="dt">u8</span><span class="op">,</span> <span class="dt">u8</span><span class="op">,</span> <span class="dt">u8</span>)<span class="op">&gt;</span>) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> img_buffer<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="pp">vec!</span>[<span class="dv">0</span><span class="op">;</span> WIDTH <span class="op">*</span> HEIGHT <span class="op">*</span> <span class="dv">3</span>]<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    img_buffer</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>par_chunks_exact_mut(WIDTH <span class="op">*</span> <span class="dv">3</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>enumerate()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span>for_each(<span class="op">|</span>(y<span class="op">,</span> rows)<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            rows<span class="op">.</span>chunks_exact_mut(<span class="dv">3</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>enumerate()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>for_each(<span class="op">|</span>(x<span class="op">,</span> triplet)<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                    <span class="kw">let</span> (cr<span class="op">,</span> ci) <span class="op">=</span> (</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                        (x <span class="kw">as</span> <span class="dt">f64</span> <span class="op">/</span> WIDTH <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> (XMAX <span class="op">-</span> XMIN) <span class="op">+</span> XMIN<span class="op">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                        (y <span class="kw">as</span> <span class="dt">f64</span> <span class="op">/</span> HEIGHT <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> (YMAX <span class="op">-</span> YMIN) <span class="op">+</span> YMIN<span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                    )<span class="op">;</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                    <span class="kw">let</span> iterations <span class="op">=</span> lsm(cr<span class="op">,</span> ci)<span class="op">;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> iterations <span class="op">==</span> MAX_ITER <span class="op">{</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                        triplet[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                        triplet[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                        triplet[<span class="dv">2</span>] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                        triplet[<span class="dv">0</span>] <span class="op">=</span> palette[iterations <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                        triplet[<span class="dv">1</span>] <span class="op">=</span> palette[iterations <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>                        triplet[<span class="dv">2</span>] <span class="op">=</span> palette[iterations <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">2</span><span class="op">;</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>                    <span class="op">}</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    img_buffer</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>We divided our image buffer into <code>WIDTH</code> parallel chunks
+of pixel triplets and applied similar routine to the non-parallel
+version</p>
+<h4 id="benchmark-results">Benchmark Results</h4>
+<p>Using the linux <strong>perf-stat(1)</strong> utility we can run 10
+samples of the benchmark tests with the following command:</p>
+<p><code>perf stat -r 10 -ddd target/release/binary</code></p>
+<table>
+<caption>Results from my Core i3</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Version</th>
+<th>CPU utilized</th>
+<th>Instructions (B)</th>
+<th>Time elapsed (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">non-parallel</td>
+<td>0.999</td>
+<td>3.505</td>
+<td>1.204244</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">parallel</td>
+<td>3.839</td>
+<td>3.485</td>
+<td>0.36724</td>
+</tr>
+</tbody>
+</table>
+<p>The parallel version is <strong>~4x</strong> faster which is the
+expected theoretical improvement of using the rest of the 3 idling
+cores.</p>
+<h3 id="vectorization-simd">Vectorization (SIMD)</h3>
+<p>Or also known as playing with all cards. <a
+href="https://en.wikipedia.org/wiki/SIMD">SIMD</a> stands for Single
+Instruction Multiple Data which is a way to exploit the data-level
+parallelism on the CPU. It provides an extended set of registers and
+instructions that can operate on varying sets of data vectors at a time,
+such as 128, 256 or even 512-bits.</p>
+<p>One of the most commonly supported extensions is <a
+href="https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#Advanced_Vector_Extensions_2"><strong>AVX2</strong></a>
+(Advanced Vector Extension) on Intel and AMD, which allows us to work
+with 256-bit register operations, or in Rust jargon, four
+<code>f64</code>s (double-precision floating point numbers).</p>
+<p>Modern compilers including the Rust compiler will often try <em>auto
+vectorizing</em> your code, meaning that it will try to optimize the
+code to use SIMD, However this is not always possible due to some set of
+limitations, in which case SIMD can be enforced by writing the
+<em>intrinsics instructions</em> by hand.</p>
+<p>Rust supports a wide variety of SIMD extensions for several ISAs
+(Instruction Set Architectures). The documentation of this can be found
+in the <a
+href="https://doc.rust-lang.org/core/arch/index.html">core::arch</a>
+module.</p>
+<p>Let’s try to write a vectorized version of our <code>lsm()</code>
+function</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>cfg<span class="at">(</span>target_arch <span class="op">=</span> <span class="st">&quot;x86_64&quot;</span><span class="at">)]</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::arch::x86_64::</span><span class="op">*;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>target_feature<span class="at">(</span>enable <span class="op">=</span> <span class="st">&quot;avx2&quot;</span><span class="at">)]</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> lsm_avx2(cr<span class="op">:</span> __m256d<span class="op">,</span> ci<span class="op">:</span> __m256d) <span class="op">-&gt;</span> __m256d <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// z (real and imaginary parts init)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zr <span class="op">=</span> _mm256_set1_pd(<span class="dv">0.0</span>)<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zi <span class="op">=</span> _mm256_set1_pd(<span class="dv">0.0</span>)<span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// z^2 (real and imaginary parts init)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zr2 <span class="op">=</span> _mm256_set1_pd(<span class="dv">0.0</span>)<span class="op">;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> zi2 <span class="op">=</span> _mm256_set1_pd(<span class="dv">0.0</span>)<span class="op">;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// useful constants</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> one <span class="op">=</span> _mm256_set1_pd(<span class="dv">1.0</span>)<span class="op">;</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> two <span class="op">=</span> _mm256_set1_pd(<span class="dv">2.0</span>)<span class="op">;</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> four <span class="op">=</span> _mm256_set1_pd(<span class="dv">4.0</span>)<span class="op">;</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// iteration counts</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> iterations <span class="op">=</span> _mm256_set1_pd(<span class="dv">0.0</span>)<span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>MAX_ITER <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// comparison mask of the magnitudes with the escape radius</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> mask <span class="op">=</span> <span class="pp">_mm256_cmp_pd::</span><span class="op">&lt;</span>_CMP_LT_OQ<span class="op">&gt;</span>(_mm256_add_pd(zr2<span class="op">,</span> zi2)<span class="op">,</span> four)<span class="op">;</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">// update the iteration counts</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        iterations <span class="op">=</span> _mm256_add_pd(_mm256_and_pd(mask<span class="op">,</span> one)<span class="op">,</span> iterations)<span class="op">;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">// break if all values exceeded the threshold</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> _mm256_movemask_pd(mask) <span class="op">==</span> <span class="dv">0</span> <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// update z</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        zi <span class="op">=</span> _mm256_add_pd(_mm256_mul_pd(two<span class="op">,</span> _mm256_mul_pd(zr<span class="op">,</span> zi))<span class="op">,</span> ci)<span class="op">;</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        zr <span class="op">=</span> _mm256_add_pd(_mm256_sub_pd(zr2<span class="op">,</span> zi2)<span class="op">,</span> cr)<span class="op">;</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">// update z^2</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        zr2 <span class="op">=</span> _mm256_mul_pd(zr<span class="op">,</span> zr)<span class="op">;</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        zi2 <span class="op">=</span> _mm256_mul_pd(zi<span class="op">,</span> zi)<span class="op">;</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    iterations</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>First we include the <code>std::arch</code> module to use the
+provided data types and the corresponding functions, then tell the
+compiler that we’re targeting processors supporting the AVX2 extension.
+The arguments are <code>__m256d</code>, which is a 256-bit wide set of
+four <code>f64</code> types. The rest of the function can be translated
+easily with the scalar version <code>lsm()</code> with the only
+exception that we’re working with four <code>f64</code>s instead of
+one.</p>
+<h4 id="under-the-hood">Under the hood</h4>
+<p>Before we benchmark the AVX2 implementation, and for what it’s worth,
+we compare the disassembly output of both <a
+href="https://gist.github.com/blocr/0dbe515b117a32d462d3b8c704686688"><code>lsm()</code></a>
+and <a
+href="https://gist.github.com/blocr/fbf1e5158ccdd9972f917f4e9883c1f2"><code>lsm_avx2()</code></a></p>
+<p>Notice that the Rust compiler automatically optimizes the scalar
+version of the LSM function by using an extension knowns as <a
+href="https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions"><strong>SSE2</strong></a></p>
+<p>One more thing to add to this. We divide the image buffer further to
+process 4 chunks of pixels at a time in the
+<code>render_parallel_mandelbrot()</code> function</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>img_buffer</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>par_chunks_exact_mut(WIDTH <span class="op">*</span> <span class="dv">3</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>enumerate()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>for_each(<span class="op">|</span>(y<span class="op">,</span> rows)<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        rows<span class="op">.</span>chunks_exact_mut(<span class="dv">12</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>enumerate()</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span>for_each(<span class="op">|</span>(c<span class="op">,</span> chunk)<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> c <span class="op">=</span> (c <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> <span class="dv">4.0</span><span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> y <span class="op">=</span> y <span class="kw">as</span> <span class="dt">f64</span><span class="op">;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> cr <span class="op">=</span> <span class="op">&amp;</span><span class="kw">mut</span> [c<span class="op">,</span> c <span class="op">+</span> <span class="dv">1.0</span><span class="op">,</span> c <span class="op">+</span> <span class="dv">2.0</span><span class="op">,</span> c <span class="op">+</span> <span class="dv">3.0</span>]<span class="op">;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> ci <span class="op">=</span> <span class="op">&amp;</span><span class="kw">mut</span> [y<span class="op">;</span> <span class="dv">4</span>]<span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> (cr<span class="op">,</span> ci) <span class="kw">in</span> cr<span class="op">.</span>iter_mut()<span class="op">.</span>zip(ci<span class="op">.</span>iter_mut()) <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                    <span class="op">*</span>cr <span class="op">=</span> (<span class="op">*</span>cr <span class="op">/</span> WIDTH <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> (XMAX <span class="op">-</span> XMIN) <span class="op">+</span> XMIN<span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                    <span class="op">*</span>ci <span class="op">=</span> (<span class="op">*</span>ci <span class="op">/</span> HEIGHT <span class="kw">as</span> <span class="dt">f64</span>) <span class="op">*</span> (YMAX <span class="op">-</span> YMIN) <span class="op">+</span> YMIN<span class="op">;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>                <span class="kw">let</span> iterations<span class="op">:</span> [<span class="dt">f64</span><span class="op">;</span> <span class="dv">4</span>] <span class="op">=</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>                    <span class="kw">unsafe</span> <span class="op">{</span> transmute(lsm_avx2(transmute(<span class="op">*</span>cr)<span class="op">,</span> transmute(<span class="op">*</span>ci))) <span class="op">};</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>                chunk</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span>chunks_exact_mut(<span class="dv">3</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span>enumerate()</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>                    <span class="op">.</span>for_each(<span class="op">|</span>(t<span class="op">,</span> triplet)<span class="op">|</span> <span class="op">{</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> iterations[t] <span class="op">==</span> MAX_ITER <span class="kw">as</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>                            triplet[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>                            triplet[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>                            triplet[<span class="dv">2</span>] <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>                        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>                            triplet[<span class="dv">0</span>] <span class="op">=</span> palette[iterations[t] <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>                            triplet[<span class="dv">1</span>] <span class="op">=</span> palette[iterations[t] <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">1</span><span class="op">;</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>                            triplet[<span class="dv">2</span>] <span class="op">=</span> palette[iterations[t] <span class="kw">as</span> <span class="dt">usize</span> <span class="op">%</span> palette<span class="op">.</span>len()]<span class="op">.</span><span class="dv">2</span><span class="op">;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>                        <span class="op">}</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>                    <span class="op">}</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span>)<span class="op">;</span></span></code></pre></div>
+<h4 id="back-to-benchmarks">Back to Benchmarks</h4>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Version</th>
+<th>CPU utilized</th>
+<th>Instructions (B)</th>
+<th>Time elapsed (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">non-parallel</td>
+<td>0.999</td>
+<td>3.505</td>
+<td>1.204244</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">parallel</td>
+<td>3.839</td>
+<td>3.485</td>
+<td>0.36724</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">parallel-avx2</td>
+<td>3.792</td>
+<td>0.864</td>
+<td>0.121628</td>
+</tr>
+</tbody>
+</table>
+<p>The last version is <strong>3x</strong> faster, and we have a
+significant decrease on the number of instructions performed, but what
+happened here? Theoretically, this should have been <strong>4x</strong>
+faster. The reality is that taking full advantage of SIMD capability is
+not always straightforward, some latency can emerge due to <a
+href="https://en.wikipedia.org/wiki/Data_structure_alignment">data-alignment</a>
+problems or instruction throughput and latency, but for the purposes of
+this discussion, i think it’s fair to be satisfied with this suboptimal
+result.</p>
+<h4 id="suggested-readings">Suggested Readings</h4>
+<hr />
+<ul>
+<li><a href="https://www.springer.com/gp/book/9781461283492">The Science
+of Fractal Images</a></li>
+<li><a
+href="https://gist.github.com/jFransham/369a86eff00e5f280ed25121454acec1">Achieving
+warp speed with Rust</a></li>
+</ul>
+</body>
+</html>
